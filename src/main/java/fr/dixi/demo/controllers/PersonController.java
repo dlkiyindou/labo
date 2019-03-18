@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @RestController
@@ -67,8 +69,16 @@ public class PersonController {
         entity.setFather(modelRequestToEntity(person.getFather()));
         entity.setGender(entity.getGender());
 
-        if (Gender.FEMALE.equals(entity.getGender())) {
-
+        Set<fr.dixi.demo.entities.Person> children = new HashSet<>();
+        for (Person child : person.getChildren()) {
+            fr.dixi.demo.entities.Person childEntity = modelRequestToEntity(child);
+            if (Gender.FEMALE.equals(entity.getGender())) {
+                childEntity.setMother(entity);
+                children.add(childEntity);
+            } else if (Gender.MALE.equals(entity.getGender())) {
+                childEntity.setFather(entity);
+                children.add(childEntity);
+            }
         }
 
         return entity;
