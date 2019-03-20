@@ -1,6 +1,5 @@
 package fr.dixi.demo.controllers;
 
-import fr.dixi.demo.enums.Gender;
 import fr.dixi.demo.repositories.PersonRepository;
 import fr.dixi.demo.request.model.Person;
 import fr.dixi.demo.services.UserTransformer;
@@ -12,7 +11,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/person")
@@ -23,14 +21,13 @@ public class PersonController {
     private UserTransformer userTransformer;
 
     @PostMapping(value = "/create", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    void create(@RequestBody Person person) {
+    Person create(@RequestBody Person person) {
         fr.dixi.demo.entities.Person entity = userTransformer.modelRequestToEntity(person);
 
-        personRepository.save(entity);
-
+        return userTransformer.entityToRequestModel(personRepository.save(entity));
     }
 
-    @GetMapping(value = "/")
+    @GetMapping(value = {"", "/", "/all"})
     Set<Person> read() {
         Set<Person> response = new HashSet<>();
         Iterator<fr.dixi.demo.entities.Person> it = personRepository.findAll().iterator();
@@ -50,12 +47,11 @@ public class PersonController {
     }
 
     @PutMapping(value = "/update/{id}", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
-    void update(@PathVariable(value = "id") Long id, @RequestBody Person person) {
+    Person update(@PathVariable(value = "id") Long id, @RequestBody Person person) {
         person.setId(id);
         fr.dixi.demo.entities.Person entity = userTransformer.modelRequestToEntity(person);
 
-        personRepository.save(entity);
-
+        return userTransformer.entityToRequestModel(personRepository.save(entity));
     }
 
     @DeleteMapping(value = "/delete/{id}")

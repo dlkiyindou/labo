@@ -17,19 +17,29 @@ public class UserTransformerImpl implements UserTransformer {
     private PersonRepository personRepository;
 
     public Person entityToRequestModel(fr.dixi.demo.entities.Person entity) {
+        return entityToRequestModel(entity, true);
+    }
+
+    public Person entityToRequestModel(fr.dixi.demo.entities.Person entity, boolean loadChildren) {
         if (entity == null) {
             return null;
         }
 
+        Set<Person> children = null;
+        if (loadChildren && entity.getChildren() != null) {
+            children = entity.getChildren().stream().map(p -> entityToRequestModel(p, false))
+                    .collect(Collectors.toSet());
+        }
+
         return new Person(
-                entity.getId(),
-                entity.getLastname(),
-                entity.getFirstname(),
-                entity.getBirthday(),
-                entity.getGender(),
-                entityToRequestModel(entity.getMother()),
-                entityToRequestModel(entity.getFather()),
-                entity.getChildren() == null ? null : entity.getChildren().stream().map(p -> entityToRequestModel(p)).collect(Collectors.toSet())
+            entity.getId(),
+            entity.getLastname(),
+            entity.getFirstname(),
+            entity.getBirthday(),
+            entity.getGender(),
+            entityToRequestModel(entity.getMother(), false),
+            entityToRequestModel(entity.getFather(), false),
+            children
         );
     }
 
@@ -38,7 +48,10 @@ public class UserTransformerImpl implements UserTransformer {
             return null;
         }
 
-        fr.dixi.demo.entities.Person entity = personRepository.findById(person.getId()).orElseGet(fr.dixi.demo.entities.Person::new);
+        fr.dixi.demo.entities.Person entity;
+        if (person.getId() == null)
+            entity = new fr.dixi.demo.entities.Person();
+        else entity = personRepository.findById(person.getId()).orElseGet(fr.dixi.demo.entities.Person::new);
 
         return updateEntity(entity, person);
     }
@@ -95,6 +108,6 @@ public class UserTransformerImpl implements UserTransformer {
             }
         }
 
-        return new fr.dixi.demo.entities.Person();
+        return entity;
     }
 }
