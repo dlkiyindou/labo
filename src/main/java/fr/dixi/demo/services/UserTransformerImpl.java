@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -84,29 +83,6 @@ public class UserTransformerImpl implements UserTransformer {
             entity.setMother(modelRequestToEntity(person.getMother()));
         }
 
-        if (person.getChildren() != null) {
-            Set<fr.dixi.demo.entities.Person> children = new HashSet<>();
-            for (Person child : person.getChildren()) {
-                fr.dixi.demo.entities.Person childEntity = modelRequestToEntity(child);
-                if (childEntity != null) {
-                    if (Gender.FEMALE.equals(entity.getGender())) {
-                        childEntity.setMother(entity);
-                        children.add(childEntity);
-                    } else if (Gender.MALE.equals(entity.getGender())) {
-                        childEntity.setFather(entity);
-                        children.add(childEntity);
-                    }
-                }
-            }
-
-            if (Gender.FEMALE.equals(entity.getGender())) {
-                entity.setChildrenIfMother(children);
-                entity.setChildrenIfFather(null);
-            } else if (Gender.MALE.equals(entity.getGender())) {
-                entity.setChildrenIfFather(children);
-                entity.setChildrenIfMother(null);
-            }
-        }
 
         return entity;
     }
