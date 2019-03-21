@@ -39,6 +39,22 @@ public class PersonController {
         return response;
     }
 
+    @GetMapping(value = {"", "/", "/read"})
+    Set<Person> read(@RequestParam(value = "name") String name) {
+        Set<Person> response;
+        response = new TreeSet<>(Comparator.comparing(p -> p.getId()));
+        Collection<fr.dixi.demo.entities.Person> cl = personRepository.findByFirstname(name);
+        cl.addAll(personRepository.findByLastname(name));
+
+        Iterator<fr.dixi.demo.entities.Person> it = cl.iterator();
+        while (it.hasNext()) {
+            Person p = userTransformer.entityToRequestModel(it.next());
+            response.add(p);
+        }
+
+        return response;
+    }
+
     @GetMapping(value = {"/{id}", "/read/{id}"})
     Person read(@PathVariable("id") Long id) {
         Optional<fr.dixi.demo.entities.Person> optionalPerson  = personRepository.findById(id);
