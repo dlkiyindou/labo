@@ -7,7 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
 
 @CrossOrigin(origins = {"http://127.0.0.1:4200", "http://localhost:4200"}, maxAge=3600)
 @RestController
@@ -27,30 +30,21 @@ public class PersonController {
 
     @GetMapping(value = {"", "/", "/read"})
     Set<Person> read() {
-        Set<Person> response;
-        response = new TreeSet<>(Comparator.comparing(p -> p.getId()));
-        Iterator<fr.dixi.demo.entities.Person> it = personRepository.findAll().iterator();
-
-        while (it.hasNext()) {
-            Person p = userTransformer.entityToRequestModel(it.next());
-            response.add(p);
-        }
+        Set<Person> response = new TreeSet<>(Comparator.comparing(p -> p.getId()));
+        personRepository.findAll().forEach(entity -> {
+            response.add(userTransformer.entityToRequestModel(entity));
+        });
 
         return response;
     }
 
-    @GetMapping(value = {"", "/", "/read"})
-    Set<Person> read(@RequestParam(value = "name") String name) {
-        Set<Person> response;
-        response = new TreeSet<>(Comparator.comparing(p -> p.getId()));
-        Collection<fr.dixi.demo.entities.Person> cl = personRepository.findByFirstname(name);
-        cl.addAll(personRepository.findByLastname(name));
-
-        Iterator<fr.dixi.demo.entities.Person> it = cl.iterator();
-        while (it.hasNext()) {
-            Person p = userTransformer.entityToRequestModel(it.next());
-            response.add(p);
-        }
+    @GetMapping(value = {"/search"})
+    Set<Person> search(@RequestParam(value = "term") String term) {
+        Set<Person> response = new TreeSet<>(Comparator.comparing(p -> p.getId()));
+        personRepository.findDistinctByFirstnameIsContainingIgnoreCaseOrLastnameIsContainingIgnoreCase(term, term)
+                .forEach(entity -> {
+            response.add(userTransformer.entityToRequestModel(entity));
+        });
 
         return response;
     }

@@ -1,13 +1,12 @@
 package fr.dixi.demo.repositories;
 
 import fr.dixi.demo.entities.Person;
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 import java.util.Collection;
 
-public interface PersonRepository extends CrudRepository<Person, Long> {
+public interface PersonRepository extends JpaRepository<Person, Long>, JpaSpecificationExecutor<Person> {
+    Collection<Person> findDistinctByFirstnameIsContainingIgnoreCaseOrLastnameIsContainingIgnoreCase(String fname, String lname);
 
-    Collection<Person> findByLastname(String lastname);
-
-    Collection<Person> findByFirstname(String firstname);
 }
